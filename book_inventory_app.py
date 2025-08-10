@@ -91,4 +91,4 @@ if menu == "View Inventory":
 
             if status == "In Library":
                 with st.expander("📤 Lend this book"):
-                    friend = st.text_input(f"Friend's Name (Book ID {book_
+                friend = st.text_input(f"Friend's Name (Book ID {book_id})", key=f"friend_{book_id}")
