@@ -8,12 +8,6 @@ import os
 CSV_FILE = "boardgame_votes.csv"
 ADMIN_PASSWORD = "ClearItAll"  # Change this to your own password
 
-# Simple auto-refresh every 5 seconds using HTML
-st.markdown(
-    "<meta http-equiv='refresh' content='5'>",
-    unsafe_allow_html=True
-)
-
 # Load votes from CSV if it exists
 if os.path.exists(CSV_FILE):
     votes_df = pd.read_csv(CSV_FILE)
@@ -81,14 +75,8 @@ if not votes_df.empty:
 else:
     st.info("No votes yet. Be the first to choose!")
 
+# Refresh button
+if st.button("🔄 Refresh Results"):
+    st.experimental_rerun()
+
 # Admin controls
-st.subheader("🛠 Admin Panel")
-admin_pass = st.text_input("Enter admin password:", type="password")
-if st.button("Clear All Votes"):
-    if admin_pass == ADMIN_PASSWORD:
-        votes_df = pd.DataFrame(columns=["Name", "Choice"])
-        votes_df.to_csv(CSV_FILE, index=False)
-        st.warning("All votes have been cleared!")
-        st.experimental_rerun()
-    else:
-        st.error("Incorrect password.")
