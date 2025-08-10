@@ -2,38 +2,46 @@
 import streamlit as st
 from collections import Counter
 
-# Title of the app
 st.title("🍕 Board Game Night Food Poll 🎲")
 
-# Initialize session state for storing votes
+# Food options
+food_options = [
+    "Panda Express",
+    "Wing Stop",
+    "Marco's Pizza",
+    "Ocha Thai",
+    "Popeye's"
+]
+
+# Store all votes in session state
 if "votes" not in st.session_state:
-    st.session_state.votes = []
+    st.session_state.votes = {}  # key = username, value = food choice
 
-st.subheader("Vote for your favorite food for the game night:")
+# Ask for user name to track votes
+username = st.text_input("Enter your name to vote:")
 
-# Input from user
-food_choice = st.text_input("Enter your preferred food (e.g., Pizza, Tacos, Sushi):")
+if username:
+    # If the user has already voted, preselect their choice
+    current_vote = st.session_state.votes.get(username, food_options[0])
+    food_choice = st.radio("Choose one:", food_options, index=food_options.index(current_vote))
 
-if st.button("Submit"):
-    if food_choice.strip():
-        st.session_state.votes.append(food_choice.strip().title())
-        st.success(f"You voted for: {food_choice.strip().title()} ✅")
-    else:
-        st.warning("Please enter a valid food choice before submitting.")
+    # Update the vote whenever the user clicks submit
+    if st.button("Submit / Update Vote"):
+        st.session_state.votes[username] = food_choice
+        st.success(f"{username}, your vote for {food_choice} has been recorded ✅")
 
-# Display current vote results
+# Show results if any votes exist
 if st.session_state.votes:
     st.subheader("Current Results:")
-    counts = Counter(st.session_state.votes)
-    
-    # Display table of results
+    counts = Counter(st.session_state.votes.values())
+
+    # Display results table
     st.table([[food, count] for food, count in counts.items()])
-    
-    # Show most popular choice(s)
+
+    # Most popular choice(s)
     max_votes = max(counts.values())
     popular_choices = [food for food, count in counts.items() if count == max_votes]
     st.markdown(f"**🥇 Most Popular:** {', '.join(popular_choices)} ({max_votes} votes)")
 
 else:
     st.info("No votes yet. Be the first to choose!")
-
