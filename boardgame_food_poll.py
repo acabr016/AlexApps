@@ -129,40 +129,42 @@ with tally_col:
 if st.button("🔄 Refresh Results"):
     refresh_page()
 
-# --- Admin panel for clearing votes ---
-st.subheader("🛠 Admin Panel")
-admin_pass = st.text_input("Enter admin password:", type="password", key="admin_pass")
-
-if st.button("Clear All Votes"):
-    if admin_pass == ADMIN_PASSWORD:
-        votes_df = pd.DataFrame(columns=["Name", "Choice"])
-        votes_df.to_csv(CSV_FILE, index=False)
-        st.warning("All votes have been cleared!")
-        refresh_page()
-    else:
-        st.error("Incorrect password.")
-
 # --- Upcoming Board Game Night calendar display ---
 st.subheader("📅 Upcoming Board Game Night")
 
 st.markdown(f"**Date:** {calendar_data['date']}")
 st.markdown(f"**Games:** {calendar_data['games']}")
 
-# --- Admin calendar editing ---
-st.subheader("🛠 Calendar Admin Panel")
-admin_pass_cal = st.text_input("Enter admin password to edit calendar:", type="password", key="cal_pass")
+# --- Admin Panel and Calendar Admin in sidebar ---
+with st.sidebar:
+    st.subheader("🛠 Admin Panel")
+    admin_pass = st.text_input("Enter admin password:", type="password", key="admin_pass")
 
-if admin_pass_cal == ADMIN_PASSWORD:
-    new_date = st.date_input("Set next game night date:", pd.to_datetime(calendar_data['date']))
-    new_games = st.text_area("Games to be played:", calendar_data['games'])
+    if st.button("Clear All Votes"):
+        if admin_pass == ADMIN_PASSWORD:
+            votes_df = pd.DataFrame(columns=["Name", "Choice"])
+            votes_df.to_csv(CSV_FILE, index=False)
+            st.warning("All votes have been cleared!")
+            refresh_page()
+        else:
+            st.error("Incorrect password.")
 
-    if st.button("Save Calendar Updates"):
-        updated_data = {
-            "date": new_date.strftime("%Y-%m-%d"),
-            "games": new_games
-        }
-        save_calendar(updated_data)
-        st.success("Calendar updated!")
-        refresh_page()
-elif admin_pass_cal:
-    st.error("Incorrect password for calendar admin.")
+    st.markdown("---")  # separator
+
+    st.subheader("🛠 Calendar Admin Panel")
+    admin_pass_cal = st.text_input("Enter admin password to edit calendar:", type="password", key="cal_pass")
+
+    if admin_pass_cal == ADMIN_PASSWORD:
+        new_date = st.date_input("Set next game night date:", pd.to_datetime(calendar_data['date']))
+        new_games = st.text_area("Games to be played:", calendar_data['games'])
+
+        if st.button("Save Calendar Updates"):
+            updated_data = {
+                "date": new_date.strftime("%Y-%m-%d"),
+                "games": new_games
+            }
+            save_calendar(updated_data)
+            st.success("Calendar updated!")
+            refresh_page()
+    elif admin_pass_cal:
+        st.error("Incorrect password for calendar admin.")
