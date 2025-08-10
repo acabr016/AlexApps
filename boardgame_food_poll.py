@@ -9,7 +9,7 @@ CSV_FILE = "boardgame_votes.csv"
 ADMIN_PASSWORD = "ClearItAll"  # Change this password
 
 # Auto-refresh every 5 seconds (5000 ms)
-st_autorefresh = st.experimental_autorefresh(interval=5000, key="refresh")
+st_autorefresh = st.autorefresh(interval=5000, key="refresh")
 
 # Load votes from CSV if it exists
 if os.path.exists(CSV_FILE):
