@@ -3,14 +3,16 @@ import streamlit as st
 from collections import Counter
 import pandas as pd
 import os
-from streamlit_autorefresh import st_autorefresh  # ✅ Import correct auto-refresh
 
 # CSV file to store votes
 CSV_FILE = "boardgame_votes.csv"
 ADMIN_PASSWORD = "ClearItAll"  # Change this to your own password
 
-# Auto-refresh every 5 seconds (5000 ms)
-st_autorefresh(interval=5000, key="refresh")
+# Simple auto-refresh every 5 seconds using HTML
+st.markdown(
+    "<meta http-equiv='refresh' content='5'>",
+    unsafe_allow_html=True
+)
 
 # Load votes from CSV if it exists
 if os.path.exists(CSV_FILE):
