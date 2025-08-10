@@ -89,11 +89,11 @@ if menu == "View Inventory":
             if borrower:
                 st.write(f"Borrowed by: {borrower} on {borrow_date}")
 
-            if status == "In Library":
+if status == "In Library":
     with st.expander("📤 Lend this book"):
         friend = st.text_input(f"Friend's Name (Book ID {book_id})", key=f"friend_{book_id}")
         borrow_date_input = st.date_input(f"Borrow Date (Book ID {book_id})", key=f"date_{book_id}")
-
+        
         lend_password = st.text_input(f"Enter password to lend (Book ID {book_id})", type="password", key=f"lendpass_{book_id}")
         if st.button(f"Lend Book {book_id}"):
             if lend_password != ADMIN_PASSWORD:
@@ -104,7 +104,3 @@ if menu == "View Inventory":
                 update_status(book_id, f"Borrowed by {friend}", borrower=friend, borrow_date=str(borrow_date_input))
                 st.success(f"📤 '{title}' lent to {friend}")
 
-                st.warning("Please enter friend's name before lending.")
-            else:
-                update_status(book_id, f"Borrowed by {friend}", borrower=friend, borrow_date=str(borrow_date_input))
-                st.success(f"📤 '{title}' lent to {friend}")
