@@ -1,5 +1,3 @@
-# library_inventory_app.py
-
 import streamlit as st
 import sqlite3
 from datetime import datetime
@@ -47,6 +45,18 @@ def get_books(search_query=None):
     conn.close()
     return rows
 
+def get_book_counts():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM books WHERE status='In Library'")
+    in_library = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM books WHERE status LIKE 'Borrowed%'")
+    lent_out = c.fetchone()[0]
+
+    conn.close()
+    return in_library, lent_out
+
 def update_status(book_id, status, borrower=None, borrow_date=None):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -74,6 +84,14 @@ menu = st.sidebar.radio("Menu", ["View Inventory", "Admin Login"])
 
 if menu == "View Inventory":
     st.subheader("📋 Book Inventory")
+
+    # Summary table
+    in_library_count, lent_out_count = get_book_counts()
+    st.subheader("📊 Library Summary")
+    st.table({
+        "Status": ["In Library", "Lent Out", "Total Books"],
+        "Count": [in_library_count, lent_out_count, in_library_count + lent_out_count]
+    })
 
     # Search bar
     search_query = st.text_input("🔍 Search by Title or Author", placeholder="Type to search...")
@@ -103,6 +121,7 @@ if menu == "View Inventory":
                         else:
                             update_status(book_id, f"Borrowed by {friend}", borrower=friend, borrow_date=str(borrow_date_input))
                             st.success(f"📤 '{title}' lent to {friend}")
+                            st.rerun()
             else:
                 return_password = st.text_input(f"Enter password to return (Book ID {book_id})", type="password", key=f"returnpass_{book_id}")
                 if st.button(f"📥 Mark as Returned (Book ID {book_id})"):
@@ -111,6 +130,7 @@ if menu == "View Inventory":
                     else:
                         update_status(book_id, "In Library", borrower=None, borrow_date=None)
                         st.success(f"📥 '{title}' marked as returned.")
+                        st.rerun()
 
             st.write("---")
 
@@ -125,6 +145,7 @@ elif menu == "Admin Login":
             if title and author:
                 add_book(title, author)
                 st.success(f"✅ '{title}' by {author} added to inventory!")
+                st.rerun()
             else:
                 st.warning("Please enter both Title and Author.")
 
@@ -135,6 +156,7 @@ elif menu == "Admin Login":
             if st.button("Delete Book"):
                 delete_book(book_to_delete[0])
                 st.success("Book deleted successfully!")
+                st.rerun()
     else:
         if password:
             st.error("❌ Incorrect password")
