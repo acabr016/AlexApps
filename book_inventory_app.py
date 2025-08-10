@@ -89,18 +89,52 @@ if menu == "View Inventory":
             if borrower:
                 st.write(f"Borrowed by: {borrower} on {borrow_date}")
 
-if status == "In Library":
-    with st.expander("📤 Lend this book"):
-        friend = st.text_input(f"Friend's Name (Book ID {book_id})", key=f"friend_{book_id}")
-        borrow_date_input = st.date_input(f"Borrow Date (Book ID {book_id})", key=f"date_{book_id}")
-        
-        lend_password = st.text_input(f"Enter password to lend (Book ID {book_id})", type="password", key=f"lendpass_{book_id}")
-        if st.button(f"Lend Book {book_id}"):
-            if lend_password != ADMIN_PASSWORD:
-                st.error("❌ Incorrect password. Cannot lend the book.")
-            elif not friend:
-                st.warning("Please enter friend's name before lending.")
-            else:
-                update_status(book_id, f"Borrowed by {friend}", borrower=friend, borrow_date=str(borrow_date_input))
-                st.success(f"📤 '{title}' lent to {friend}")
+            if status == "In Library":
+                with st.expander("📤 Lend this book"):
+                    friend = st.text_input(f"Friend's Name (Book ID {book_id})", key=f"friend_{book_id}")
+                    borrow_date_input = st.date_input(f"Borrow Date (Book ID {book_id})", key=f"date_{book_id}")
 
+                    lend_password = st.text_input(f"Enter password to lend (Book ID {book_id})", type="password", key=f"lendpass_{book_id}")
+                    if st.button(f"Lend Book {book_id}"):
+                        if lend_password != ADMIN_PASSWORD:
+                            st.error("❌ Incorrect password. Cannot lend the book.")
+                        elif not friend:
+                            st.warning("Please enter friend's name before lending.")
+                        else:
+                            update_status(book_id, f"Borrowed by {friend}", borrower=friend, borrow_date=str(borrow_date_input))
+                            st.success(f"📤 '{title}' lent to {friend}")
+            else:
+                return_password = st.text_input(f"Enter password to return (Book ID {book_id})", type="password", key=f"returnpass_{book_id}")
+                if st.button(f"📥 Mark as Returned (Book ID {book_id})"):
+                    if return_password != ADMIN_PASSWORD:
+                        st.error("❌ Incorrect password. Cannot return the book.")
+                    else:
+                        update_status(book_id, "In Library", borrower=None, borrow_date=None)
+                        st.success(f"📥 '{title}' marked as returned.")
+
+            st.write("---")
+
+elif menu == "Admin Login":
+    password = st.text_input("Enter admin password:", type="password")
+    if password == ADMIN_PASSWORD:
+        st.success("✅ Logged in as admin")
+        st.subheader("➕ Add a Book")
+        title = st.text_input("Book Title")
+        author = st.text_input("Author")
+        if st.button("Add to Inventory"):
+            if title and author:
+                add_book(title, author)
+                st.success(f"✅ '{title}' by {author} added to inventory!")
+            else:
+                st.warning("Please enter both Title and Author.")
+
+        st.subheader("🗑 Delete a Book")
+        books = get_books()
+        if books:
+            book_to_delete = st.selectbox("Select a book to delete:", [(b[0], f"{b[1]} by {b[2]}") for b in books], format_func=lambda x: x[1])
+            if st.button("Delete Book"):
+                delete_book(book_to_delete[0])
+                st.success("Book deleted successfully!")
+    else:
+        if password:
+            st.error("❌ Incorrect password")
