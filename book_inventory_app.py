@@ -31,18 +31,10 @@ def add_book(title, author):
     conn.commit()
     conn.close()
 
-def get_books(search_query=None):
+def get_books():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    if search_query:
-        search_query = f"%{search_query}%"
-        c.execute("""
-            SELECT * FROM books 
-            WHERE title LIKE ? OR author LIKE ? 
-            ORDER BY author COLLATE NOCASE ASC, title COLLATE NOCASE ASC
-        """, (search_query, search_query))
-    else:
-        c.execute("SELECT * FROM books ORDER BY author COLLATE NOCASE ASC, title COLLATE NOCASE ASC")
+    c.execute("SELECT * FROM books ORDER BY title ASC")
     rows = c.fetchall()
     conn.close()
     return rows
@@ -64,23 +56,4 @@ def delete_book(book_id):
 
 # ------------------------------
 # Streamlit UI
-# ------------------------------
-st.set_page_config(page_title="📚 My Book Inventory", layout="centered")
-st.title("📚 My Book Inventory")
-
-init_db()
-
-menu = st.sidebar.radio("Menu", ["View Inventory", "Admin Login"])
-
-if menu == "View Inventory":
-    st.subheader("📋 Book Inventory")
-    
-    # Search bar
-    search_query = st.text_input("🔍 Search by Title or Author", placeholder="Type to search...")
-    books = get_books(search_query)
-
-    if not books:
-        st.info("No books found.")
-    else:
-        for book in books:
-            book_id, title, author, status, b_
+# ----------------
