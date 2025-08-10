@@ -1,8 +1,17 @@
 # file: boardgame_food_poll.py
 import streamlit as st
 from collections import Counter
+import pandas as pd
+import os
 
-st.title("🍕 Board Game Night Food Poll 🎲")
+# CSV file to store votes
+CSV_FILE = "boardgame_votes.csv"
+
+# Load votes from CSV if it exists
+if os.path.exists(CSV_FILE):
+    votes_df = pd.read_csv(CSV_FILE)
+else:
+    votes_df = pd.DataFrame(columns=["Name", "Choice"])
 
 # Food options
 food_options = [
@@ -13,29 +22,47 @@ food_options = [
     "Popeye's"
 ]
 
-# Store all votes in session state
-if "votes" not in st.session_state:
-    st.session_state.votes = {}  # key = username, value = food choice
+st.title("🍕 Board Game Night Food Poll 🎲")
+st.subheader("Vote for your favorite food for the game night!")
 
-# Ask for user name to track votes
-username = st.text_input("Enter your name to vote:")
+# User name input
+username = st.text_input("Enter your name:")
 
-if username:
+# Only show voting options if name is entered
+if username.strip():
     # If the user has already voted, preselect their choice
-    current_vote = st.session_state.votes.get(username, food_options[0])
-    food_choice = st.radio("Choose one:", food_options, index=food_options.index(current_vote))
+    if username in votes_df["Name"].values:
+        current_choice = votes_df.loc[votes_df["Name"] == username, "Choice"].values[0]
+    else:
+        current_choice = food_options[0]
 
-    # Update the vote whenever the user clicks submit
+    # Voting selection
+    food_choice = st.radio("Choose one:", food_options, index=food_options.index(current_choice))
+
+    # Submit / Update button
     if st.button("Submit / Update Vote"):
-        st.session_state.votes[username] = food_choice
+        if username in votes_df["Name"].values:
+            # Update existing vote
+            votes_df.loc[votes_df["Name"] == username, "Choice"] = food_choice
+        else:
+            # Add new vote
+            votes_df = pd.concat(
+                [votes_df, pd.DataFrame({"Name": [username], "Choice": [food_choice]})],
+                ignore_index=True
+            )
+
+        # Save to CSV
+        votes_df.to_csv(CSV_FILE, index=False)
         st.success(f"{username}, your vote for {food_choice} has been recorded ✅")
 
-# Show results if any votes exist
-if st.session_state.votes:
-    st.subheader("Current Results:")
-    counts = Counter(st.session_state.votes.values())
+# Show everyone's votes if there are any
+if not votes_df.empty:
+    st.subheader("📋 Everyone's Votes")
+    st.dataframe(votes_df)
 
-    # Display results table
+    # Show tally
+    st.subheader("📊 Current Results")
+    counts = Counter(votes_df["Choice"])
     st.table([[food, count] for food, count in counts.items()])
 
     # Most popular choice(s)
