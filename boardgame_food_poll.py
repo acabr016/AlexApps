@@ -7,7 +7,7 @@ import json
 
 CSV_FILE = "boardgame_votes.csv"
 CALENDAR_FILE = "boardgame_calendar.json"
-ADMIN_PASSWORD = "ClearItAll"  # Change to your own secure password
+ADMIN_PASSWORD = "Gameknights"  # Change to your own secure password
 
 # --- Session state workaround for refresh ---
 if "refresh" not in st.session_state:
