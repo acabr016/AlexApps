@@ -73,8 +73,60 @@ init_db()
 menu = st.sidebar.radio("Menu", ["View Inventory", "Admin Login"])
 
 if menu == "View Inventory":
-    # your code for viewing inventory
+    st.subheader("📋 Book Inventory")
+
+    # Search bar
+    search_query = st.text_input("🔍 Search by Title or Author", placeholder="Type to search...")
+    books = get_books(search_query)
+
+    if not books:
+        st.info("No books found.")
+    else:
+        for book in books:
+            book_id, title, author, status, borrower, borrow_date = book
+            st.markdown(f"**{title}** by *{author}*")
+            st.write(f"Status: {status}")
+            if borrower:
+                st.write(f"Borrowed by: {borrower} on {borrow_date}")
+
+            if status == "In Library":
+                with st.expander("📤 Lend this book"):
+                    friend = st.text_input(f"Friend's Name (Book ID {book_id})", key=f"friend_{book_id}")
+                    borrow_date_input = st.date_input(f"Borrow Date (Book ID {book_id})", key=f"date_{book_id}")
+                    if st.button(f"Lend Book {book_id}"):
+                        if friend:
+                            update_status(book_id, f"Borrowed by {friend}", borrower=friend, borrow_date=str(borrow_date_input))
+                            st.success(f"📤 '{title}' lent to {friend}")
+                        else:
+                            st.warning("Enter friend's name before lending.")
+            else:
+                if st.button(f"📥 Mark as Returned (Book ID {book_id})"):
+                    update_status(book_id, "In Library", borrower=None, borrow_date=None)
+                    st.success(f"📥 '{title}' marked as returned.")
+
+            st.write("---")
 
 elif menu == "Admin Login":
-    # your code for admin login
+    password = st.text_input("Enter admin password:", type="password")
+    if password == ADMIN_PASSWORD:
+        st.success("✅ Logged in as admin")
+        st.subheader("➕ Add a Book")
+        title = st.text_input("Book Title")
+        author = st.text_input("Author")
+        if st.button("Add to Inventory"):
+            if title and author:
+                add_book(title, author)
+                st.success(f"✅ '{title}' by {author} added to inventory!")
+            else:
+                st.warning("Please enter both Title and Author.")
 
+        st.subheader("🗑 Delete a Book")
+        books = get_books()
+        if books:
+            book_to_delete = st.selectbox("Select a book to delete:", [(b[0], f"{b[1]} by {b[2]}") for b in books], format_func=lambda x: x[1])
+            if st.button("Delete Book"):
+                delete_book(book_to_delete[0])
+                st.success("Book deleted successfully!")
+    else:
+        if password:
+            st.error("❌ Incorrect password")
