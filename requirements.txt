@@ -1,2 +1,5 @@
 streamlit
 sqlite3
+easyocr
+io
+os
