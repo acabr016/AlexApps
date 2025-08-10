@@ -70,4 +70,11 @@ st.title("📚 My Book Inventory")
 
 init_db()
 
-menu = st.sidebar.radio("Menu", ["View Inv]()
+menu = st.sidebar.radio("Menu", ["View Inventory", "Admin Login"])
+
+if menu == "View Inventory":
+    # your code for viewing inventory
+
+elif menu == "Admin Login":
+    # your code for admin login
+
