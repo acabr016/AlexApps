@@ -6,12 +6,10 @@ import os
 
 # CSV file to store votes
 CSV_FILE = "boardgame_votes.csv"
-ADMIN_PASSWORD = "ClearItAll"  # Change to your own
+ADMIN_PASSWORD = "ClearItAll"  # Change this password
 
 # Auto-refresh every 5 seconds (5000 ms)
-st_autorefresh = st.experimental_rerun if not hasattr(st, "autorefresh") else st.autorefresh
-if hasattr(st, "autorefresh"):
-    st.autorefresh(interval=5000)
+st_autorefresh = st.experimental_autorefresh(interval=5000, key="refresh")
 
 # Load votes from CSV if it exists
 if os.path.exists(CSV_FILE):
@@ -72,22 +70,4 @@ if not votes_df.empty:
     counts = Counter(votes_df["Choice"])
     st.table([[food, count] for food, count in counts.items()])
 
-    # Most popular choice(s)
-    max_votes = max(counts.values())
-    popular_choices = [food for food, count in counts.items() if count == max_votes]
-    st.markdown(f"**🥇 Most Popular:** {', '.join(popular_choices)} ({max_votes} votes)")
-
-else:
-    st.info("No votes yet. Be the first to choose!")
-
-# Admin controls
-st.subheader("🛠 Admin Panel")
-admin_pass = st.text_input("Enter admin password:", type="password")
-if st.button("Clear All Votes"):
-    if admin_pass == ADMIN_PASSWORD:
-        votes_df = pd.DataFrame(columns=["Name", "Choice"])
-        votes_df.to_csv(CSV_FILE, index=False)
-        st.warning("All votes have been cleared!")
-        st.experimental_rerun()
-    else:
-        st.error("Incorrect password.")
+    # Most popular choi
