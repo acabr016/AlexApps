@@ -65,7 +65,7 @@ def delete_book(book_id):
 # ------------------------------
 # Streamlit UI
 # ------------------------------
-st.set_page_config(page_title="📚 My Book Inventory", layout="centered")
+st.set_page_config(page_title="📚 Our Library Inventory", layout="centered")
 st.title("📚 Our Library Inventory")
 
 init_db()
