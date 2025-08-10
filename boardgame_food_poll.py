@@ -3,11 +3,14 @@ import streamlit as st
 from collections import Counter
 import pandas as pd
 import os
-from streamlit_autorefresh import st_autorefresh  # ✅ correct import
+from streamlit_autorefresh import st_autorefresh  # ✅ Import correct auto-refresh
 
 # CSV file to store votes
 CSV_FILE = "boardgame_votes.csv"
-ADMIN_PASSWORD = "ClearItAll"  # Change this password
+ADMIN_PASSWORD = "ClearItAll"  # Change this to your own password
+
+# Auto-refresh every 5 seconds (5000 ms)
+st_autorefresh(interval=5000, key="refresh")
 
 # Load votes from CSV if it exists
 if os.path.exists(CSV_FILE):
@@ -32,7 +35,7 @@ username = st.text_input("Enter your name:")
 
 # Only show voting options if name is entered
 if username.strip():
-    # If the user has already voted, preselect their choice
+    # Preselect user's previous choice if they have voted
     if username in votes_df["Name"].values:
         current_choice = votes_df.loc[votes_df["Name"] == username, "Choice"].values[0]
     else:
@@ -68,4 +71,22 @@ if not votes_df.empty:
     counts = Counter(votes_df["Choice"])
     st.table([[food, count] for food, count in counts.items()])
 
-    # Most popular choi
+    # Most popular choice(s)
+    max_votes = max(counts.values())
+    popular_choices = [food for food, count in counts.items() if count == max_votes]
+    st.markdown(f"**🥇 Most Popular:** {', '.join(popular_choices)} ({max_votes} votes)")
+
+else:
+    st.info("No votes yet. Be the first to choose!")
+
+# Admin controls
+st.subheader("🛠 Admin Panel")
+admin_pass = st.text_input("Enter admin password:", type="password")
+if st.button("Clear All Votes"):
+    if admin_pass == ADMIN_PASSWORD:
+        votes_df = pd.DataFrame(columns=["Name", "Choice"])
+        votes_df.to_csv(CSV_FILE, index=False)
+        st.warning("All votes have been cleared!")
+        st.experimental_rerun()
+    else:
+        st.error("Incorrect password.")
