@@ -75,4 +75,54 @@ st.subheader("🛠 Admin Panel")
 admin_pass = st.text_input("Enter admin password:", type="password")
 if st.button("Clear All Votes"):
     if admin_pass == ADMIN_PASSWORD:
-        v
+
+# Calendar section
+
+import json
+from datetime import datetime
+
+CALENDAR_FILE = "boardgame_calendar.json"
+
+def load_calendar():
+    if os.path.exists(CALENDAR_FILE):
+        with open(CALENDAR_FILE, "r") as f:
+            return json.load(f)
+    else:
+        # Default calendar data
+        return {
+            "date": "2025-08-20",
+            "games": "Catan, Carcassonne"
+        }
+
+def save_calendar(data):
+    with open(CALENDAR_FILE, "w") as f:
+        json.dump(data, f)
+
+# Load current calendar info
+calendar_data = load_calendar()
+
+st.subheader("📅 Upcoming Board Game Night")
+
+st.markdown(f"**Date:** {calendar_data['date']}")
+st.markdown(f"**Games:** {calendar_data['games']}")
+
+# Admin calendar editing
+st.subheader("🛠 Calendar Admin Panel")
+admin_pass_cal = st.text_input("Enter admin password to edit calendar:", type="password", key="cal_pass")
+
+if admin_pass_cal == ADMIN_PASSWORD:
+    new_date = st.date_input("Set next game night date:", datetime.strptime(calendar_data['date'], "%Y-%m-%d"))
+    new_games = st.text_area("Games to be played:" , calendar_data['games'])
+
+    if st.button("Save Calendar Updates"):
+        updated_data = {
+            "date": new_date.strftime("%Y-%m-%d"),
+            "games": new_games
+        }
+        save_calendar(updated_data)
+        st.success("Calendar updated!")
+        st.experimental_rerun()
+elif admin_pass_cal:
+    st.error("Incorrect password for calendar admin.")
+
+        
