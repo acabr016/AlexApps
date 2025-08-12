@@ -43,11 +43,9 @@ calendar_data = load_calendar()
 
 # --- Food options ---
 food_options = [
-    "Panda Express",
-    "Wing Stop",
-    "Marco's Pizza",
-    "Ocha Thai",
-    "Popeye's"
+    "Pick up food on your own before arriving to Game Night",
+    "Order Pizza to share"
+  
 ]
 
 # --- Inject mobile-friendly CSS ---
@@ -81,7 +79,7 @@ st.markdown(
 
 # --- Page Title ---
 st.title("🍕 Board Game Night Food Poll 🎲")
-st.subheader("Vote for your favorite food for the game night!")
+st.subheader("Vote for what we going to do for food!")
 
 # --- Voting input ---
 with st.container():
