@@ -4,6 +4,7 @@ from collections import Counter
 import pandas as pd
 import os
 import json
+from datetime import datetime
 
 CSV_FILE = "boardgame_votes.csv"
 CALENDAR_FILE = "boardgame_calendar.json"
@@ -30,6 +31,7 @@ def load_calendar():
     else:
         return {
             "date": "2025-08-20",
+            "time": "18:00",
             "games": "Catan, Carcassonne"
         }
 
@@ -81,7 +83,7 @@ st.markdown(
 st.title("🍕 Board Game Night Food Poll 🎲")
 st.subheader("Vote for your favorite food for the game night!")
 
-# --- Voting input inside container ---
+# --- Voting input ---
 with st.container():
     username = st.text_input("Enter your name:")
 
@@ -119,7 +121,8 @@ with tally_col:
     if not votes_df.empty:
         st.subheader("📊 Current Results")
         counts = Counter(votes_df["Choice"])
-        st.table([[food, count] for food, count in counts.items()])
+        results_df = pd.DataFrame(list(counts.items()), columns=["Food", "Votes"]).sort_values(by="Votes", ascending=False)
+        st.dataframe(results_df)
 
         max_votes = max(counts.values())
         popular_choices = [food for food, count in counts.items() if count == max_votes]
@@ -131,8 +134,9 @@ if st.button("🔄 Refresh Results"):
 
 # --- Upcoming Board Game Night calendar display ---
 st.subheader("📅 Upcoming Board Game Night")
-
 st.markdown(f"**Date:** {calendar_data['date']}")
+if "time" in calendar_data:
+    st.markdown(f"**Time:** {calendar_data['time']}")
 st.markdown(f"**Games:** {calendar_data['games']}")
 
 # --- Admin Panel and Calendar Admin in sidebar ---
@@ -156,11 +160,13 @@ with st.sidebar:
 
     if admin_pass_cal == ADMIN_PASSWORD:
         new_date = st.date_input("Set next game night date:", pd.to_datetime(calendar_data['date']))
+        new_time = st.time_input("Set game night start time:", datetime.strptime(calendar_data.get('time', '18:00'), "%H:%M").time())
         new_games = st.text_area("Games to be played:", calendar_data['games'])
 
         if st.button("Save Calendar Updates"):
             updated_data = {
                 "date": new_date.strftime("%Y-%m-%d"),
+                "time": new_time.strftime("%H:%M"),
                 "games": new_games
             }
             save_calendar(updated_data)
