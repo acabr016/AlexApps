@@ -31,7 +31,7 @@ def load_calendar():
     else:
         return {
             "date": "2025-08-20",
-            "time": "18:00",
+            "time": "06:00 PM",
             "games": "Catan, Carcassonne"
         }
 
@@ -160,17 +160,22 @@ with st.sidebar:
 
     if admin_pass_cal == ADMIN_PASSWORD:
         new_date = st.date_input("Set next game night date:", pd.to_datetime(calendar_data['date']))
-        new_time = st.time_input("Set game night start time:", datetime.strptime(calendar_data.get('time', '18:00'), "%H:%M").time())
+
+        # Parse saved time in AM/PM format, fallback to 6:00 PM if missing
+        try:
+            default_time = datetime.strptime(calendar_data.get('time', '06:00 PM'), "%I:%M %p").time()
+        except ValueError:
+            default_time = datetime.strptime("06:00 PM", "%I:%M %p").time()
+
+        new_time = st.time_input("Set game night start time:", default_time)
+
         new_games = st.text_area("Games to be played:", calendar_data['games'])
 
         if st.button("Save Calendar Updates"):
             updated_data = {
                 "date": new_date.strftime("%Y-%m-%d"),
-                "time": new_time.strftime("%H:%M"),
+                "time": new_time.strftime("%I:%M %p"),  # AM/PM format
                 "games": new_games
             }
             save_calendar(updated_data)
             st.success("Calendar updated!")
-            refresh_page()
-    elif admin_pass_cal:
-        st.error("Incorrect password for calendar admin.")
